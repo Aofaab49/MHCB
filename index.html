@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>คำนวนการดื่มน้ำต่อวัน</title>
+    <style>
+        body {
+            font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(120deg, #e0f7fa 0%, #fffde7 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 440px;
+            margin: 3em auto;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 6px 32px rgba(0,0,0,0.10);
+            padding: 2.7em 2.2em 2em 2.2em;
+        }
+        h1 {
+            text-align: center;
+            color: #00796b;
+            margin-bottom: 1.7em;
+            font-size: 2.2em;
+            letter-spacing: 1.5px;
+            font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        label {
+            display: block;
+            margin-top: 1.3em;
+            font-size: 1.13em;
+            color: #333;
+            font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.8em;
+            margin-top: 0.45em;
+            border: 1.5px solid #b2dfdb;
+            border-radius: 9px;
+            font-size: 1.08em;
+            background: #f9f9f9;
+            transition: border 0.2s;
+            font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        input[type="number"]:focus, select:focus {
+            border: 2px solid #26a69a;
+            outline: none;
+            background: #e0f2f1;
+        }
+        button[type="submit"] {
+            margin-top: 2.2em;
+            width: 100%;
+            padding: 1em;
+            background: linear-gradient(90deg, #26a69a 60%, #80cbc4 100%);
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 1.18em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 12px rgba(38,166,154,0.10);
+            transition: background 0.2s, transform 0.1s;
+            font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        button[type="submit"]:hover {
+            background: linear-gradient(90deg, #009688 60%, #4db6ac 100%);
+            transform: translateY(-2px) scale(1.02);
+        }
+        .result {
+            margin-top: 2.2em;
+            padding: 1.7em 1.3em;
+            border-radius: 15px;
+            border: none;
+            background: #e0f2f1;
+            color: #004d40;
+            box-shadow: 0 2px 16px rgba(0,150,136,0.10);
+            font-size: 1.13em;
+            animation: fadeIn 0.7s;
+            font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .result h2 {
+            margin-top: 0;
+            color: #00796b;
+            font-size: 1.4em;
+            letter-spacing: 1px;
+            font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .result b {
+            color: #00695c;
+            font-weight: 600;
+        }
+        .flag-icon {
+            width: 70px;
+            height: 46px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 12px;
+            border: 2.5px solid #388e3c;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .flag-green { background: #43a047; border-color: #388e3c; }
+        .flag-yellow { background: #ffeb3b; border-color: #fbc02d; }
+        .flag-red { background: #e53935; border-color: #b71c1c; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        @media (max-width: 600px) {
+            .container { padding: 1.2em 0.5em 1em 0.5em; }
+            h1 { font-size: 1.3em; }
+            .result { font-size: 1em; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>คำนวนการดื่มน้ำต่อวัน</h1>
+        <form id="waterForm">
+            <label>
+                น้ำหนักตัว (กิโลกรัม):
+                <input type="number" id="weight" min="1" required>
+            </label>
+            <label>
+                อุณหภูมิ (°C):
+                <input type="number" id="temperature" min="0" max="30" required>
+            </label>
+            <label>
+                ความชื้นสัมพัทธ์ (%):
+                <input type="number" id="humidity" min="0" max="100" required>
+            </label>
+            <button type="submit">คำนวณ</button>
+        </form>
+        <div id="result" class="result" style="display:none"></div>
+    </div>
+    <script>
+    document.getElementById('waterForm').onsubmit = function(e) {
+        e.preventDefault();
+        const weight = parseFloat(document.getElementById('weight').value);
+        const temperature = parseFloat(document.getElementById('temperature').value);
+        const humidity = parseFloat(document.getElementById('humidity').value);
+
+        // สูตร: น้ำหนัก (กก.) x 30 มล.
+        let base = weight * 30; // มิลลิลิตร
+        let flag = "green";
+        let flagText = "เขียว";
+        let flagMsg = "";
+        let recommend = base;
+
+        // เงื่อนไขธงและข้อความตามตัวอย่าง
+        if (temperature >= 35 && humidity >= 90) {
+            flag = "red";
+            flagText = "แดง";
+            recommend = base + 300;
+            flagMsg = `อุณหภูมิ ${temperature}°C ความชื้น ${humidity}% ต้องดื่มน้ำเพิ่ม 300 มล. ทันทีตามน้ำหนักของคุณ (ปริมาณน้ำที่แนะนำ: ${recommend.toLocaleString()} มล./วัน)`;
+        } else if (temperature >= 32 && humidity >= 75) {
+            flag = "yellow";
+            flagText = "เหลือง";
+            recommend = base + 150;
+            flagMsg = `อุณหภูมิ ${temperature}°C ความชื้น ${humidity}% ควรดื่มน้ำเพิ่ม 150 มล. ตามน้ำหนักของคุณ (ปริมาณน้ำที่แนะนำ: ${recommend.toLocaleString()} มล./วัน)`;
+        } else {
+            flag = "green";
+            flagText = "เขียว";
+            recommend = base;
+            flagMsg = `อุณหภูมิ ${temperature}°C ความชื้น ${humidity}% ดื่มน้ำตามปกติ (ปริมาณน้ำที่แนะนำ: ${recommend.toLocaleString()} มล./วัน)`;
+        }
+
+        // ข้อความแนะนำ
+        let advice = "ข้อแนะนำ: ";
+        if (flag === "red") {
+            advice += "อากาศร้อนจัดและความชื้นสูงมาก ต้องดื่มน้ำเพิ่มทันทีและระวังภาวะขาดน้ำ";
+        } else if (flag === "yellow") {
+            advice += "อากาศร้อนและความชื้นสูง ควรดื่มน้ำเพิ่มและสังเกตอาการผิดปกติ";
+        } else {
+            advice += "คุณสามารถดื่มน้ำตามปกติ และควรสังเกตปัสสาวะให้มีสีใสหรือเหลืองอ่อน";
+        }
+
+        // แสดงรูปธง
+        let flagIcon = "";
+        if (flag === "green") {
+            flagIcon = `<div class="flag-icon flag-green"></div>`;
+        } else if (flag === "yellow") {
+            flagIcon = `<div class="flag-icon flag-yellow"></div>`;
+        } else {
+            flagIcon = `<div class="flag-icon flag-red"></div>`;
+        }
+
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('result').innerHTML = `
+            <div style="text-align:center">${flagIcon}</div>
+            <h2>ปริมาณน้ำที่แนะนำ ต่อวัน</h2>
+            <p>น้ำหนัก: <b>${weight}</b> กก.</p>
+            <p><b>ธงสี${flagText}:</b> ${flagMsg}</p>
+            <p>${advice}</p>
+        `;
+    }
+    </script>
+</body>
+</html>
