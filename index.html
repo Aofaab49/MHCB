@@ -33,9 +33,11 @@
             font-size: 1.13em;
             color: #333;
             font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            width: 100%;
+            box-sizing: border-box;
         }
         input[type="number"], select {
-            width: 100%;
+            width: 92%;
             padding: 0.8em;
             margin-top: 0.45em;
             border: 1.5px solid #b2dfdb;
@@ -92,18 +94,7 @@
             color: #00695c;
             font-weight: 600;
         }
-        .flag-icon {
-            width: 70px;
-            height: 46px;
-            border-radius: 8px;
-            display: inline-block;
-            margin-bottom: 12px;
-            border: 2.5px solid #388e3c;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-        }
-        .flag-green { background: #43a047; border-color: #388e3c; }
-        .flag-yellow { background: #ffeb3b; border-color: #fbc02d; }
-        .flag-red { background: #e53935; border-color: #b71c1c; }
+        /* .flag-icon, .flag-green, .flag-yellow, .flag-red { display: none; } */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px);}
             to { opacity: 1; transform: translateY(0);}
@@ -145,55 +136,36 @@
 
         // สูตร: น้ำหนัก (กก.) x 30 มล.
         let base = weight * 30; // มิลลิลิตร
-        let flag = "green";
-        let flagText = "เขียว";
         let flagMsg = "";
         let recommend = base;
 
-        // เงื่อนไขธงและข้อความตามตัวอย่าง
+        // เงื่อนไขข้อความตามตัวอย่าง
         if (temperature >= 35 && humidity >= 90) {
-            flag = "red";
-            flagText = "แดง";
             recommend = base + 300;
             flagMsg = `อุณหภูมิ ${temperature}°C ความชื้น ${humidity}% ต้องดื่มน้ำเพิ่ม 300 มล. ทันทีตามน้ำหนักของคุณ (ปริมาณน้ำที่แนะนำ: ${recommend.toLocaleString()} มล./วัน)`;
         } else if (temperature >= 32 && humidity >= 75) {
-            flag = "yellow";
-            flagText = "เหลือง";
             recommend = base + 150;
             flagMsg = `อุณหภูมิ ${temperature}°C ความชื้น ${humidity}% ควรดื่มน้ำเพิ่ม 150 มล. ตามน้ำหนักของคุณ (ปริมาณน้ำที่แนะนำ: ${recommend.toLocaleString()} มล./วัน)`;
         } else {
-            flag = "green";
-            flagText = "เขียว";
             recommend = base;
             flagMsg = `อุณหภูมิ ${temperature}°C ความชื้น ${humidity}% ดื่มน้ำตามปกติ (ปริมาณน้ำที่แนะนำ: ${recommend.toLocaleString()} มล./วัน)`;
         }
 
         // ข้อความแนะนำ
         let advice = "ข้อแนะนำ: ";
-        if (flag === "red") {
+        if (temperature >= 35 && humidity >= 90) {
             advice += "อากาศร้อนจัดและความชื้นสูงมาก ต้องดื่มน้ำเพิ่มทันทีและระวังภาวะขาดน้ำ";
-        } else if (flag === "yellow") {
+        } else if (temperature >= 32 && humidity >= 75) {
             advice += "อากาศร้อนและความชื้นสูง ควรดื่มน้ำเพิ่มและสังเกตอาการผิดปกติ";
         } else {
             advice += "คุณสามารถดื่มน้ำตามปกติ และควรสังเกตปัสสาวะให้มีสีใสหรือเหลืองอ่อน";
         }
 
-        // แสดงรูปธง
-        let flagIcon = "";
-        if (flag === "green") {
-            flagIcon = `<div class="flag-icon flag-green"></div>`;
-        } else if (flag === "yellow") {
-            flagIcon = `<div class="flag-icon flag-yellow"></div>`;
-        } else {
-            flagIcon = `<div class="flag-icon flag-red"></div>`;
-        }
-
         document.getElementById('result').style.display = 'block';
         document.getElementById('result').innerHTML = `
-            <div style="text-align:center">${flagIcon}</div>
             <h2>ปริมาณน้ำที่แนะนำ ต่อวัน</h2>
             <p>น้ำหนัก: <b>${weight}</b> กก.</p>
-            <p><b>ธงสี${flagText}:</b> ${flagMsg}</p>
+            <p>${flagMsg}</p>
             <p>${advice}</p>
         `;
     }
